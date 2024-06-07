@@ -1,5 +1,5 @@
 import sys
-from markdown_to_html import markdown_to_html
+from markdown_to_html import markdown_to_html, markdown_to_ansi
 
 def read_markdown_file(file_path):
     try:
@@ -25,27 +25,48 @@ def read_markdown_file(file_path):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python main.py <input_markdown_file> [--out <output_html_file>]", file=sys.stderr)
+        print("Usage: python main.py <input_markdown_file> [--out <output_file>] [--format <html|ansi>]", file=sys.stderr)
         sys.exit(1)
 
     input_file = sys.argv[1]
     markdown_content = read_markdown_file(input_file)
-    html_content = markdown_to_html(markdown_content)
-
-    if len(sys.argv) > 2 and sys.argv[2] == '--out':
-        if len(sys.argv) < 4:
+    
+    output_file = None
+    output_format = 'ansi'
+    
+    if '--out' in sys.argv:
+        output_file_index = sys.argv.index('--out') + 1
+        if output_file_index >= len(sys.argv):
             print("Error: Please specify the output file path.", file=sys.stderr)
             sys.exit(1)
-        output_file = sys.argv[3]
+        output_file = sys.argv[output_file_index]
+        output_format = 'html'
+
+    if '--format' in sys.argv:
+        format_index = sys.argv.index('--format') + 1
+        if format_index >= len(sys.argv):
+            print("Error: Please specify the format (html or ansi).", file=sys.stderr)
+            sys.exit(1)
+        output_format = sys.argv[format_index]
+
+    if output_format == 'html':
+        formatted_content = markdown_to_html(markdown_content)
+    elif output_format == 'ansi':
+        formatted_content = markdown_to_ansi(markdown_content)
+    else:
+        print("Error: Unsupported format. Please use 'html' or 'ansi'.", file=sys.stderr)
+        sys.exit(1)
+
+    if output_file:
         try:
             with open(output_file, 'w', encoding='utf-8') as file:
-                file.write(html_content)
-            print("HTML output written to", output_file)
+                file.write(formatted_content)
+            print("Output written to", output_file)
         except Exception as e:
             print("Error:", e, file=sys.stderr)
             sys.exit(1)
     else:
-        print(html_content)
+        print(formatted_content)
 
 if __name__ == "__main__":
     main()

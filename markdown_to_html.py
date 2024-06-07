@@ -26,9 +26,7 @@ def markdown_to_html(markdown_text):
         markdown_text = markdown_text.replace(f'```{block}```', html_block)
 
     markdown_text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', markdown_text)
-
     markdown_text = re.sub(r'_(.*?)_', r'<i>\1</i>', markdown_text)
-
     markdown_text = re.sub(r'`(.*?)`', r'<tt>\1</tt>', markdown_text)
 
     paragraphs = markdown_text.split('\n\n')
@@ -36,3 +34,23 @@ def markdown_to_html(markdown_text):
     html_text = ''.join(html_paragraphs)
 
     return html_text
+
+def markdown_to_ansi(markdown_text):
+    if not validate_markdown(markdown_text):
+        print("Error: invalid markdown", file=sys.stderr)
+        sys.exit(1)
+
+    preformatted_blocks = re.findall(r'```(.*?)```', markdown_text, re.DOTALL)
+    for block in preformatted_blocks:
+        ansi_block = f'\033[7m{block}\033[0m'
+        markdown_text = markdown_text.replace(f'```{block}```', ansi_block)
+
+    markdown_text = re.sub(r'\*\*(.*?)\*\*', r'\033[1m\1\033[0m', markdown_text)
+    markdown_text = re.sub(r'_(.*?)_', r'\033[3m\1\033[0m', markdown_text)
+    markdown_text = re.sub(r'`(.*?)`', r'\033[7m\1\033[0m', markdown_text)
+
+    paragraphs = markdown_text.split('\n\n')
+    ansi_paragraphs = ['{}\n'.format(p.replace('\n', ' ')) for p in paragraphs]
+    ansi_text = ''.join(ansi_paragraphs)
+
+    return ansi_text
