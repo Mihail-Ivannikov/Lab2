@@ -42,15 +42,12 @@ def markdown_to_ansi(markdown_text):
 
     preformatted_blocks = re.findall(r'```(.*?)```', markdown_text, re.DOTALL)
     for block in preformatted_blocks:
-        html_block = f'\033[7m{block}\033[0m'
-        markdown_text = markdown_text.replace(f'```{block}```', html_block)
+        ansi_block = f'\033[7m{block}\033[0m'
+        markdown_text = markdown_text.replace(f'```{block}```', ansi_block)
 
     markdown_text = re.sub(r'\*\*(.*?)\*\*', r'\033[1m\1\033[0m', markdown_text)
-
     markdown_text = re.sub(r'_(.*?)_', r'\033[3m\1\033[0m', markdown_text)
-
-    # Introduce an error: incorrect ANSI escape code for monospace
-    markdown_text = re.sub(r'`(.*?)`', r'\033[8m\1\033[0m', markdown_text)  # Incorrect escape code \033[8m
+    markdown_text = re.sub(r'`(.*?)`', r'\033[7m\1\033[0m', markdown_text)
 
     paragraphs = markdown_text.split('\n\n')
     ansi_paragraphs = ['{}\n'.format(p.replace('\n', ' ')) for p in paragraphs]
